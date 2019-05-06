@@ -3,15 +3,17 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
-var ContactsSchema = Schema({
-    nombre: String,
-    apellido: String,
-    apodo: String,
-    correo: String,
-    direccion: String,
-    image: String,
-    telefono: String,
-    user: { type: Schema.ObjectId, ref: 'User' }
+var ContactSchema = Schema({
+    user: { type: Schema.ObjectId, ref: 'User' },
+    contacto: {
+        nombres: String,
+        apellidos: String,
+        apodo: String,
+        correo: String,
+        direccion: String,
+        image: String,
+        telefono: String
+    }
 });
 
-module.exports = mongoose.model('Contacts', ContactsSchema);
+module.exports = mongoose.model('Contact', ContactSchema);

@@ -1,116 +1,95 @@
 'use strict'
 
-var Contacto = require('../models/contacts');
+var User = require('../models/user');
+var Contact = require('../models/contacts')
 
-/*Va a obtener todas los contactos sin ninguna condicion*/
-function getContactos(req, res) {
-    Contacto.find().populate('user').exec((err, contactos) => {
-        if (err) return res.status(500).send({ message: 'Error en la solicitud' });
+function addContact(req, res) {
 
-        if (!contactos) return res.status(404).send({ message: 'Error al listar los contactos' });
+    var contact = new Contact();
+    var params = req.body;
+    var userID = req.user.sub
 
-        return res.status(200).send({ contactos });
+    User.findById(userID, (err, userFound) => {
+        if (err) return res.status(500).send({ message: 'Error al buscar el usuario' });
+        if (!userFound) return res.status(404).send({ message: 'No se ha podido encontrar el usuario al que quieres agregarle un contacto' })
+
+        if (params.nombres && params.telefono) {
+            contact.user = userID;
+            contact.contacto.nombres = params.nombres;
+            contact.contacto.apellidos = params.apellidos;
+            contact.contacto.apodo = params.apodo;
+            contact.contacto.correo = params.correo;
+            contact.contacto.direccion = params.direccion
+            contact.contacto.image = null;
+            contact.contacto.telefono = params.telefono;
+            contact.save();
+            return res.status(200).send({ message: 'Contacto añadido exitosamente' })
+        }
+
     })
 }
 
-function addContactos(req, res) {
-    var contacto = new Contacto();
+function updateContact(req, res) {
+    var userID = req.user.sub;
+    var contactID = req.params.id
     var params = req.body;
 
-    if (params.nombre && params.apellido && params.correo) {
-        contacto.nombre = params.nombre;
-        contacto.apellido = params.apellido;
-        contacto.apodo = params.apodo;
-        contacto.correo = params.correo;
-        contacto.direccion = params.direccion;
-        contacto.image = null;
-        contacto.telefono = params.telefono;
-        contacto.user = req.user.sub;
+    Contact.findById(contactID, (err, ok) => {
 
-        contacto.save((err, contactoGuardado) => {
-            if (err) return res.status(500).send({ message: 'Error en la peticion' });
-
-            if (!contactoGuardado) return res.status(404).send({ message: 'Error al agregar el contacto' });
-
-            return res.status(200).send({ contacto: contactoGuardado });
-        })
-    } else {
-        res.status(200).send({
-            message: 'Rellene los datos necesarios'
-        })
-    }
-}
-
-/*Va a obtener los contactos con una condicion*/
-function getContacto(req, res) {
-    var contactoId = req.params.id;
-
-    Contacto.findById(contactoId, (err, contacto) => {
         if (err) return res.status(500).send({ message: 'Error en la peticion' });
+        if (!ok) return res.status(404).send({ message: 'No se ha encontrado el contacto a actualizar' })
+        if (ok.user == userID) {
 
-        if (!contacto) return res.status(404).send({ message: 'Error al listar el contacto' });
+            Contact.findOneAndUpdate(contactID, params, { new: true }, (err, contactUpdated) => {
+                if (err) return res.status(500).send({ message: 'Error en la peticion' });
+                if (!contactUpdated) return res.status(404).send({ message: 'Error al buscar usuario' })
 
-        return res.status(200).send({ contacto });
+                return res.status(200).send({ contact: contactUpdated })
+
+
+            })
+        } else {
+            return res.status(200).send({ message: 'No puedes actualizar los contactos de otro usuario' })
+        }
     })
 }
 
-function deleteContacto(req, res) {
-    var contactoId = req.params.id;
-    // var contacto = new Contacto();
+function deleteContact(req, res) {
+    var idContact = req.params.id;
+    var userId = req.user.sub; 
 
-    Contacto.findById(contactoId, (err, contactoEncontrado)=>{
-        if(err) return res.status(500).send({message: 'Error en la solicitud'});
+    Contact.findById(idContact, (err, contactFound) => {
+        if (err) return res.status(500).send({ message: 'Error en la peticion' });
+        if (!contactFound) return res.status(404).send({ message: 'No se ha encontrado el contacto a eliminar' });
 
-        if(!contactoEncontrado) return res.status(404).send('error');
+        if (contactFound.user == userId) {
+            Contact.findByIdAndDelete(idContact, (err, deleted) => {
+                if (err) return res.status(500).send({ message: 'Error en la peticion' });
+                if (!deleted) return res.status(404).send({ message: 'No se ha encontrado el contacto a eliminar' });
 
-        for (let x = 0; x < contactoEncontrado.user.id.length; x++) {
-            if(contactoEncontrado.user.id[x] === req.user.sub){
-                return res.status(500).send({message: 'no puede eliminar otros contactos'});
-            }else{
-                Contacto.findByIdAndDelete(contactoId, (err, contactoEliminado)=>{
-                    if(err) return res.status(500).send({message: 'Error en la peticion'});
-
-                    if(!contactoEliminado) return res.status(404).send({message: 'Error'});
-
-                    return res.status(200).send({message: 'Se elimino correctamente'});
-                })
-            }
+                return res.status(200).send({ message: 'Se ha eliminado el contacto' })
+            })
+        } else {
+            return res.status(200).send({ message: 'No puedes eliminar los contactos de otro usuario' })
         }
-        
-    })    
+    })
 }
 
-function editContacto(req, res) {
-    var contactoId = req.params.id;
-    var params = req.body;
-    // var contacto = new Contacto();
+function getContactsUser(req, res) {
+    var idContacts = req.user.sub;
 
-    Contacto.findById(contactoId, (err, contactoEncontrado)=>{
-        if(err) return res.status(500).send({message: 'Error en la solicitud'});
+    Contact.find({ user: idContacts }, (err, contactsFound) => {
+        if (err) return res.status(500).send({ message: 'Error en la peticion' });
+        if (!contactsFound) return res.status(404).send({ message: 'No tienes contactos' });
 
-        if(!contactoEncontrado) return res.status(404).send('Error al editar el contacto');
+        return res.status(200).send({ contactsFound })
 
-        for (let x = 0; x < contactoEncontrado.user.id.length; x++) {
-            if(contactoEncontrado.user.id[x] === req.user.sub){
-                return res.status(500).send({message: 'no puede eliminar otros contactos'});
-            }else{
-                Contacto.findByIdAndUpdate(contactoId, params, (err, contactoEditado)=>{
-                    if(err) return res.status(500).send({message: 'Error en la peticion'});
-
-                    if(!contactoEditado) return res.status(404).send({message: 'Error'});
-
-                    return res.status(200).send({contactoEditado});
-                })
-            }
-        }
-        
-    })    
+    })
 }
 
 module.exports = {
-    getContactos,
-    addContactos,
-    getContacto,
-    deleteContacto,
-    editContacto
+    addContact,
+    updateContact,
+    deleteContact,
+    getContactsUser
 }

@@ -1,0 +1,122 @@
+<app-navbar></app-navbar>
+
+<div class="card" *ngFor="let contacto of contactsFound">
+    <h1>{{contacto.contacto.nombres}}</h1>
+    <p class="title">{{contacto.contacto.correo}}</p>
+    <p>{{contacto.contacto.telefono}}</p>
+
+    <p><button data-toggle="modal" data-target="#modalActualizarContacto">Editar</button></p>
+    <p><button>Eliminar</button></p>
+</div>
+
+<!-- Modal Agregar Contacto -->
+<div class="modal fade" id="modalContacto" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Agregar Contacto</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+            </div>
+            <div class="modal-body">
+
+                <form #formaddContacto="ngForm" (ngSubmit)="addContacto()">
+
+                    <div class="form-group">
+                        <label for="nombreContacto">Nombres</label>
+                        <input type="text" autocomplete="off" class="form-control" name="nombreContacto" #titulo="ngModel" [(ngModel)]="contactosModel.nombres" id="nombresContacto" placeholder="Ingresar Nombre Contacto">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="apellidoContacto">Apellidos</label>
+                        <input type="text" autocomplete="off" class="form-control" name="apellidosContacto" #apellidos="ngModel" [(ngModel)]="contactosModel.apellidos" id="apellidosContacto" placeholder="Ingresar descripcion">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="apodoContacto">Apodo</label>
+                        <input type="text" autocomplete="off" class="form-control" name="apodoContacto" #apodo="ngModel" [(ngModel)]="contactosModel.apodo" id="apodoContacto" placeholder="Ingresar apodo">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="correoContacto">Correo</label>
+                        <input type="text" autocomplete="off" class="form-control" name="correoContacto" #correo="ngModel" [(ngModel)]="contactosModel.correo" id="correoContacto" placeholder="Ingresar correo">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="direccionContacto">Direccion</label>
+                        <input type="text" autocomplete="off" class="form-control" name="direccionContacto" #direccion="ngModel" [(ngModel)]="contactosModel.direccion" id="direccionContacto" placeholder="Ingresar direccion">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="telefonoContacto">Telefono</label>
+                        <input type="text" autocomplete="off" class="form-control" name="telefonoContacto" #telefono="ngModel" [(ngModel)]="contactosModel.telefono" id="telefonoContacto" placeholder="Ingresar telefono">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Enviar datos</button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Modal Editar Contacto -->
+<div class="modal fade" id="modalActualizarContacto" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+
+        <form #formUpdateContact="ngForm" (ngSubmit)="updateContact()">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Editar Contacto</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="nombre">Nombre</label>
+                        <input type="text" name="nombre" #nombre="ngModel" [(ngModel)]="contactosModel.contacto.nombres" class="form-control" id="nombre" placeholder="Enter name">
+                    </div>
+                    <div class="form-group">
+                        <label for="apellido">Apellido</label>
+                        <input type="text" name="apellido" #apellido="ngModel" [(ngModel)]="contactosModel.contacto.apellidos" class="form-control" id="apellido" placeholder="Enter lastname">
+                    </div>
+                    <div class="form-group">
+                        <label for="apodo">Apodo</label>
+                        <input type="text" name="apodo" #apodo="ngModel" [(ngModel)]="contactosModel.contacto.apodo" class="form-control" id="apodo" placeholder="Enter nickname">
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Correo</label>
+                        <input type="email" name="email" #email="ngModel" [(ngModel)]="contactosModel.contacto.correo" class="form-control" id="email" placeholder="Enter email">
+                    </div>
+                    <div class="form-group">
+                        <label for="address">Direccion</label>
+                        <input type="text" name="address" #address="ngModel" [(ngModel)]="contactosModel.contacto.direccion" class="form-control" id="address" placeholder="Enter address">
+                    </div>
+                    <div class="form-group">
+                        <label for="tel">Telefono</label>
+                        <input type="tel" name="tel" #tel="ngModel" [(ngModel)]="contactosModel.contacto.telefono" class="form-control" id="tel" placeholder="Enter telephone">
+                    </div>
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="inputGroupFileAddon01">Actualizar</span>
+                        </div>
+                        <div class="custom-file">
+                            <input type="file" class="custom-file-input" id="inputGroupFile01" aria-describedby="inputGroupFileAddon01" (change)='fileChangeEvent($event)'>
+                            <label class="custom-file-label" for="inputGroupFile01">Choose file</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-warning col-4" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-outline-success col-4">Save changes</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modalContacto">
+    Agregar Contacto
+  </button>
